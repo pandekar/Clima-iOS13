@@ -31,7 +31,7 @@ class WeatherViewController: UIViewController, UITextFieldDelegate {
         searchTextField.endEditing(true)
     }
     /**
-     UITextField delegate function, function is triggered when keyboard return button is pressed
+        UITextField delegate function, function is triggered when keyboard return button is pressed
      */
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         print(searchTextField.text!)
@@ -43,7 +43,7 @@ class WeatherViewController: UIViewController, UITextFieldDelegate {
     
     
     /**
-      UITextField delegate function, function is triggered to close the keyboard
+        UITextField delegate function, function is triggered to close the keyboard
       when the condition inside the function is fulfilled
      */
     func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
@@ -55,7 +55,9 @@ class WeatherViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
-    //UITextField delegate function, function is triggered when done editing the textField
+    /**
+        UITextField delegate function, function is triggered when done editing the textField
+     */
     func textFieldDidEndEditing(_ textField: UITextField) {
         
         // use searchTextField.text to get  the weather for that city.
