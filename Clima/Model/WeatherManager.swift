@@ -10,7 +10,8 @@ import Foundation
 
 protocol WeatherManagerDelegate {
     
-    func didUpdateWeather(_ weather: WeatherModel)
+    func didUpdateWeather(_ weatherManager: WeatherManager,_ weather: WeatherModel)
+    func didFailWithError(error: Error)
 }
 
 struct WeatherManager {
@@ -22,10 +23,10 @@ struct WeatherManager {
     func fetchWeather(cityName: String) {
         let urlString = "\(weatherURL)&q=\(cityName)"
         
-        performRequest(urlString: urlString)
+        performRequest(urlString)
     }
     
-    func performRequest(urlString: String) {
+    func performRequest(_ urlString: String) {
         
         //1. create a URL
         if let url = URL(string: urlString) {
@@ -37,13 +38,13 @@ struct WeatherManager {
             //5. make closure for callback <completionHandler: (Data?, URLResponse?, Error?) -> Void>
             let task = urlSession.dataTask(with: url, completionHandler: { (data, urlResponse, error) in
                 if error != nil {
-                    print(error!)
+                    delegate?.didFailWithError(error: error!)
                     return
                 }
                 
                 if let resultData = data {
-                    if let weather = parseJSON(weatherData: resultData) {
-                        delegate?.didUpdateWeather(weather)
+                    if let weather = parseJSON(resultData) {
+                        delegate?.didUpdateWeather(self, weather)
                     }
                 }
             })
@@ -53,7 +54,7 @@ struct WeatherManager {
         }
     }
     
-    func parseJSON(weatherData: Data) -> WeatherModel? {
+    func parseJSON(_ weatherData: Data) -> WeatherModel? {
         let decoder = JSONDecoder()
         
         do {
@@ -66,7 +67,7 @@ struct WeatherManager {
             
             return weatherData
         } catch {
-            print("error >>>", error)
+            delegate?.didFailWithError(error: error)
             return nil
         }
     }
