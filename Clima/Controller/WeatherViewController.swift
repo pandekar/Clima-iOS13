@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreLocation
 
 class WeatherViewController: UIViewController {
 
@@ -16,9 +17,16 @@ class WeatherViewController: UIViewController {
     @IBOutlet weak var searchTextField: UITextField!
     
     var weatherManager = WeatherManager()
+    let locationManager = CLLocationManager()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // setup location manager
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.delegate = self
+        locationManager.requestLocation()
+
         // Do any additional setup after loading the view.
         searchTextField.placeholder = "Cari"
         
@@ -30,11 +38,44 @@ class WeatherViewController: UIViewController {
     }
 }
 
+//MARK: - WeatherManagerDelegate
+
+extension WeatherViewController: WeatherManagerDelegate {
+    func didUpdateWeather(_ weatherManager: WeatherManager,_ weather: WeatherModel) {
+        DispatchQueue.main.async {
+            self.conditionImageView.image = UIImage(systemName: weather.weatherCondition)
+            self.temperatureLabel.text = weather.temperatureString
+            self.cityLabel.text = weather.name
+        }
+    }
+    
+    func didFailWithError(error: Error) {
+        print(error)
+    }
+}
+
+//MARK: - CLLocationManagerDelegate
+
+extension WeatherViewController: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("ERROR", error.localizedDescription)
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let savedLocation = locations.last {
+            let lat = savedLocation.coordinate.latitude
+            let lon = savedLocation.coordinate.longitude
+            
+            weatherManager.fetchWeather(latitude: lat, longitude: lon)
+        }
+    }
+}
+
+//MARK: - UITextFieldDelegate
+
 extension WeatherViewController: UITextFieldDelegate {
 
     @IBAction func searchPressed(_ sender: UIButton) {
-        print(searchTextField.text!)
-        
         //close keyboard when value is true
         searchTextField.endEditing(true)
     }
@@ -42,8 +83,6 @@ extension WeatherViewController: UITextFieldDelegate {
         UITextField delegate function, function is triggered when keyboard return button is pressed
      */
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        print(searchTextField.text!)
-        
         //close keyboard when value is true
         searchTextField.endEditing(true)
         return true
@@ -74,20 +113,5 @@ extension WeatherViewController: UITextFieldDelegate {
         }
         
         searchTextField.text = ""
-    }
-}
-
-extension WeatherViewController: WeatherManagerDelegate {
-    func didUpdateWeather(_ weatherManager: WeatherManager,_ weather: WeatherModel) {
-        print(weather.temperature)
-        DispatchQueue.main.async {
-            self.conditionImageView.image = UIImage(systemName: weather.weatherCondition)
-            self.temperatureLabel.text = weather.temperatureString
-            self.cityLabel.text = weather.name
-        }
-    }
-    
-    func didFailWithError(error: Error) {
-        print(error)
     }
 }
