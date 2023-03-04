@@ -27,6 +27,7 @@ struct WeatherManager {
         performRequest(urlString)
     }
     
+    // function OVERLOADING
     func fetchWeather(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
         let savedLatitude = String(format: "%.1f", latitude)
         let savedLongitude = String(format: "%.1f", longitude)
